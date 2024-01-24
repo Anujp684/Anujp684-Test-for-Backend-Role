@@ -1,0 +1,80 @@
+from flask import Flask, request, jsonify
+from flask_restful import Api, Resource
+from flask_sqlalchemy import SQLAlchemy
+import uuid
+import hashlib
+import datetime
+
+app = Flask(_name_)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///file_share.db'
+db = SQLAlchemy(app)
+api = Api(app)
+
+# Model for User
+class User(db.Model):
+    id = db.Column(db.String, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(64), nullable=False)
+    is_ops_user = db.Column(db.Boolean, default=False)
+
+# Model for File
+class File(db.Model):
+    id = db.Column(db.String, primary_key=True)
+    filename = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('files', lazy=True))
+
+# Resource for Ops User Login
+class OpsLoginResource(Resource):
+    def post(self):
+        # Your authentication logic here
+        # ...
+
+# Resource for Ops User Upload File
+class OpsUploadResource(Resource):
+    def post(self):
+        # Your file upload logic here
+        # ...
+
+# Resource for Client User Signup
+class ClientSignupResource(Resource):
+    def post(self):
+        # Your signup logic here
+        # ...
+
+# Resource for Client User Email Verification
+class ClientVerifyResource(Resource):
+    def get(self, verification_token):
+        # Your email verification logic here
+        # ...
+
+# Resource for Client User Login
+class ClientLoginResource(Resource):
+    def post(self):
+        # Your authentication logic here
+        # ...
+
+# Resource for Client User Download File
+class ClientDownloadResource(Resource):
+    def get(self, file_id):
+        # Your file download logic here
+        # ...
+
+# Resource for Client User List Uploaded Files
+class ClientFilesResource(Resource):
+    def get(self):
+        # Your file listing logic here
+        # ...
+
+# API Routes
+api.add_resource(OpsLoginResource, '/ops/login')
+api.add_resource(OpsUploadResource, '/ops/upload')
+api.add_resource(ClientSignupResource, '/client/signup')
+api.add_resource(ClientVerifyResource, '/client/verify/<verification_token>')
+api.add_resource(ClientLoginResource, '/client/login')
+api.add_resource(ClientDownloadResource, '/client/download/<file_id>')
+api.add_resource(ClientFilesResource, '/client/files')
+
+if _name_ == '_main_':
+    db.create_all()
+    app.run(debug=True)
